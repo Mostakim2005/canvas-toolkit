@@ -98,7 +98,7 @@ export class MediaPickerModal extends Modal {
 		card.toggleClass('is-selected', this.selected.has(item.path));
 		const preview = card.createDiv({ cls: 'ctk-media-preview' });
 		if (item.kind === 'image') {
-			const img = preview.createEl('img', { alt: item.name, loading: 'lazy' }) as HTMLImageElement;
+			const img = preview.createEl('img', { attr: { alt: item.name, loading: 'lazy' } }) as HTMLImageElement;
 			const file = this.hostApp.vault.getAbstractFileByPath(item.path);
 			if (file && 'path' in file) {
 				img.src = this.hostApp.vault.getResourcePath(file as TFile);
@@ -110,7 +110,7 @@ export class MediaPickerModal extends Modal {
 				});
 			}
 		} else if (item.kind === 'audio') {
-			const audio = preview.createEl('audio', { controls: true }) as HTMLAudioElement;
+			const audio = preview.createEl('audio', { attr: { controls: 'true' } }) as HTMLAudioElement;
 			const file = this.hostApp.vault.getAbstractFileByPath(item.path);
 			if (file instanceof TFile) {
 				audio.src = this.hostApp.vault.getResourcePath(file);

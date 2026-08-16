@@ -60,7 +60,7 @@ export class AudioPlayerModal extends Modal {
 		play.addEventListener('click', () => { if (!this.audio) return; if (this.audio.paused) void this.audio.play(); else this.audio.pause(); play.empty(); setIcon(play, this.audio.paused ? 'play' : 'pause'); });
 		const forward = controls.createEl('button', { attr: { 'aria-label': 'Seek forward 10 seconds' } }); setIcon(forward, 'rotate-cw');
 		forward.addEventListener('click', () => this.seek(this.settings?.audioSeekSeconds ?? 10));
-		const range = this.progressEl = controls.createEl('input', { type: 'range', min: '0', max: '1', step: '0.001' }) as HTMLInputElement;
+		const range = this.progressEl = controls.createEl('input', { attr: { type: 'range', min: '0', max: '1', step: '0.001' } }) as HTMLInputElement;
 		range.value = '0';
 		range.addEventListener('input', () => { if (this.audio) this.audio.currentTime = Number(range.value) * this.audio.duration; });
 		controls.createSpan({ cls: 'ctk-audio-time', text: '0:00 / 0:00' });
