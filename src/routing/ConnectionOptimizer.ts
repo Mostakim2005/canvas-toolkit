@@ -46,7 +46,7 @@ function segmentsIntersect(a:{x:number;y:number}, b:{x:number;y:number}, c:{x:nu
 export class ConnectionOptimizer {
 	optimize(data: CanvasDataModel, options: ConnectionOptimizationOptions = {}): CanvasDataModel {
 		const nodes = nodeMap(data);
-		const result = structuredClone(data) as CanvasDataModel;
+		const result = structuredClone(data);
 		for (const edge of result.edges) {
 			const from = nodes.get(edge.fromNode); const to = nodes.get(edge.toNode);
 			if (!from || !to) continue;

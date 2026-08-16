@@ -9,7 +9,7 @@ export interface SnapOptions {
 
 export class SnapEngine {
 	snapNodes(data: CanvasDataModel, ids: string[], options: SnapOptions = {}): CanvasDataModel {
-		const result = structuredClone(data) as CanvasDataModel;
+		const result = structuredClone(data);
 		const selected = new Set(ids);
 		const tolerance = Math.max(1, options.alignmentTolerance ?? 10);
 		const targets = result.nodes.filter((node) => !selected.has(node.id));
@@ -33,7 +33,7 @@ export class SnapEngine {
 
 	private nudgeFromOverlap(node: CanvasNodeModel, targets: CanvasNodeModel[], step: number): void {
 		let guard = 0;
-		while (guard++ < 8 && targets.some((t) => overlapArea(node as Rect, t as Rect) > 0)) node.x += step;
+		while (guard++ < 8 && targets.some((t) => overlapArea(node, t) > 0)) node.x += step;
 	}
 }
 
