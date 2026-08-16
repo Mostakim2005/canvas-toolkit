@@ -6,6 +6,8 @@ import {
 	ItemView,
 	TFile,
 	Menu,
+	Editor,
+	MarkdownFileInfo,
 	type MenuItem,
 } from 'obsidian';
 import { CanvasToolkitSettingTab } from './settings';
@@ -129,7 +131,7 @@ export default class CanvasToolkitPlugin extends Plugin {
 		registerPhase6Commands(this);
 		registerPhase7Commands(this);
 
-		this.registerEvent(this.app.workspace.on('editor-menu', (menu: Menu, _editor: unknown, view: MarkdownView | ItemView) => {
+		this.registerEvent(this.app.workspace.on('editor-menu', (menu: Menu, _editor: Editor, view: MarkdownView | MarkdownFileInfo) => {
 			if (view instanceof MarkdownView) menu.addItem((item: MenuItem) => item.setTitle('Insert media with preview').setIcon('image').onClick(() => void this.openMediaPicker(view)));
 		}));
 
