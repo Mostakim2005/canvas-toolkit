@@ -66,7 +66,7 @@ export class RelationshipEngine {
 	async planAddMissingCanvasEdges(adapter: CanvasAdapter, result?: ReconciliationResult): Promise<OperationPlan> {
 		const data = adapter.getData();
 		const reconciliation = result ?? await this.reconcile(adapter);
-		const after = structuredClone(data) as CanvasDataModel;
+		const after = structuredClone(data);
 		const existing = new Set(after.edges.map(e => e.id));
 		const usedPairs = new Set(after.edges.map(e => `${e.fromNode}\u0000${e.toNode}`));
 		for (const candidate of reconciliation.missingCanvasEdges) {
@@ -97,7 +97,7 @@ export class RelationshipEngine {
 	async planSafeReconciliation(adapter: CanvasAdapter, result?: ReconciliationResult): Promise<OperationPlan> {
 		const reconciliation = result ?? await this.reconcile(adapter);
 		const data = adapter.getData();
-		const after = structuredClone(data) as CanvasDataModel;
+		const after = structuredClone(data);
 		const usedIds = new Set(after.edges.map(edge => edge.id));
 		const usedPairs = new Set(after.edges.map(edge => `${edge.fromNode}\u0000${edge.toNode}`));
 		for (const candidate of reconciliation.missingCanvasEdges) {
@@ -142,7 +142,7 @@ export class RelationshipEngine {
 
 		let targetId = target.nodeId;
 		let targetNode = targetId ? data.nodes.find(node => node.id === targetId) : undefined;
-		const after = structuredClone(data) as CanvasDataModel;
+		const after = structuredClone(data);
 		if (!targetNode && target.filePath) {
 			const abstract = this.app.vault.getAbstractFileByPath(target.filePath);
 			if (!(abstract instanceof TFile)) throw new Error(`Target file not found: ${target.filePath}`);
@@ -192,7 +192,7 @@ export class RelationshipEngine {
 		if (!source || !target) throw new Error('Both source and target nodes must exist.');
 		if (sourceId === targetId) throw new Error('A node cannot be linked to itself.');
 		const changes: PlannedChange[] = [];
-		const after = structuredClone(data) as CanvasDataModel;
+		const after = structuredClone(data);
 		if (mode === 'visual' || mode === 'both') {
 			const duplicate = after.edges.some(edge => edge.fromNode === sourceId && edge.toNode === targetId);
 			if (!duplicate) {
@@ -221,7 +221,7 @@ export class RelationshipEngine {
 		const source = data.nodes.find(node => node.id === sourceId);
 		const target = data.nodes.find(node => node.id === targetId);
 		if (!source || !target) throw new Error('Both source and target nodes must exist.');
-		const after = structuredClone(data) as CanvasDataModel;
+		const after = structuredClone(data);
 		const remaining = after.edges.filter(edge => !(edge.fromNode === sourceId && edge.toNode === targetId));
 		if (remaining.length === after.edges.length && !removeMarkdown) throw new Error('No Canvas relationship exists between these nodes.');
 		after.edges = remaining;
