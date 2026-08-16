@@ -71,3 +71,5 @@
 .ctk-insight-title { font-weight:600; }
 .ctk-insight-detail { color:var(--text-muted); font-size:var(--font-ui-smaller); margin-top:3px; }
 @media (max-width: 640px) { .ctk-insights-metrics { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+
+.ctk-import-settings-textarea { width: 100%; min-height: 260px; }

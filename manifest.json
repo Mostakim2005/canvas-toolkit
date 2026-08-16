@@ -2,7 +2,7 @@
 	"id": "canvas-toolkit",
 	"name": "Canvas Toolkit",
 	"version": "0.9.0",
-	"minAppVersion": "1.0.0",
+	"minAppVersion": "1.1.0",
 	"description": "A modular Canvas and media toolkit for graph relationships, safe transactions, layouts, snapping, presets, and preview-first media workflows.",
 	"author": "Mostakim Kazi",
 	"isDesktopOnly": false
