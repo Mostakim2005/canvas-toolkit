@@ -49,7 +49,7 @@ export class TransactionEngine {
 			this.undoStack.pop();
 			this.redoStack.push(record);
 			this.trim(this.redoStack);
-			new Notice('Canvas Toolkit: operation undone.');
+			new Notice('Operation undone.');
 			return true;
 		} finally { this.active = false; }
 	}
@@ -66,7 +66,7 @@ export class TransactionEngine {
 			this.redoStack.pop();
 			this.undoStack.push(record);
 			this.trim(this.undoStack);
-			new Notice('Canvas Toolkit: operation redone.');
+			new Notice('Operation redone.');
 			return true;
 		} finally { this.active = false; }
 	}

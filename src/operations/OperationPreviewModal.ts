@@ -32,24 +32,26 @@ export class OperationPreviewModal extends Modal {
 		if (this.plan.warnings.length) {
 			const warnings = root.createDiv({ cls: 'ctk-warning-box' });
 			warnings.createEl('strong', { text: 'Warnings' });
-			for (const warning of this.plan.warnings) warnings.createEl('div', { text: warning });
+			for (const warning of this.plan.warnings) warnings.createDiv({ text: warning });
 		}
 		const footer = root.createDiv({ cls: 'ctk-modal-actions' });
 		footer.createEl('button', { text: 'Cancel' }).addEventListener('click', () => this.close());
 		const apply = footer.createEl('button', { text: 'Apply changes' });
 		apply.addClass('mod-cta');
-		apply.addEventListener('click', async () => {
-			apply.disabled = true;
-			try {
-				await this.engine.commit(this.plan, this.activeCanvas);
-				new Notice('Canvas Toolkit: changes applied.');
-				this.onCommitted?.();
-				this.close();
-			} catch (error) {
-				apply.disabled = false;
-				new Notice(`Canvas Toolkit: ${error instanceof Error ? error.message : 'operation failed'}`);
-			}
-		});
+		apply.addEventListener('click', () => { void this.applyChanges(apply); });
 	}
+	private async applyChanges(button: HTMLButtonElement): Promise<void> {
+		button.disabled = true;
+		try {
+			await this.engine.commit(this.plan, this.activeCanvas);
+			new Notice('Changes applied.');
+			this.onCommitted?.();
+			this.close();
+		} catch (error) {
+			button.disabled = false;
+			new Notice(`Canvas Toolkit: ${error instanceof Error ? error.message : 'Operation failed'}`);
+		}
+	}
+
 	onClose(): void { this.contentEl.empty(); }
 }
