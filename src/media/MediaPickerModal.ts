@@ -1,4 +1,4 @@
-import { Modal, Notice, setIcon, TFile, type App, type Editor, type MarkdownView } from 'obsidian';
+import { Modal, Notice, setIcon, TFile, type App, type MarkdownView } from 'obsidian';
 import type { CanvasToolkitSettings, MediaItem } from '../types';
 import { MediaScanner } from './MediaScanner';
 
@@ -46,14 +46,14 @@ export class MediaPickerModal extends Modal {
 		this.contentEl.empty();
 		const toolbar = this.contentEl.createDiv({ cls: 'ctk-toolbar' });
 		const left = toolbar.createDiv({ cls: 'ctk-toolbar-group ctk-field' });
-		const search = left.createEl('input', { type: 'search', placeholder: 'Search media…' }) as HTMLInputElement;
+		const search = left.createEl('input', { attr: { type: 'search', placeholder: 'Search media…' } });
 		search.value = this.query;
 		search.addEventListener('input', () => {
 			this.query = search.value.trim().toLowerCase();
 			this.renderGrid();
 		});
 		const controls = toolbar.createDiv({ cls: 'ctk-toolbar-group' });
-		const filter = controls.createEl('select') as HTMLSelectElement;
+		const filter = controls.createEl('select');
 		filter.createEl('option', { value: 'all', text: 'All media' });
 		filter.createEl('option', { value: 'image', text: 'Images' });
 		filter.createEl('option', { value: 'pdf', text: 'PDF' });
@@ -67,16 +67,18 @@ export class MediaPickerModal extends Modal {
 		grid2.addEventListener('click', () => { this.gridColumns = 2; this.render(); });
 		grid3.addEventListener('click', () => { this.gridColumns = 3; this.render(); });
 		const insert = controls.createEl('button', { text: `Insert${this.selected.size ? ` (${this.selected.size})` : ''}` });
-		insert.addEventListener('click', async () => {
-			const selected = this.items.filter((item) => this.selected.has(item.path));
-			if (!selected.length) {
-				new Notice('Select at least one item.');
-				return;
-			}
-			await this.options.onInsert(selected);
-			this.close();
-		});
+		insert.addEventListener('click', () => { void this.insertSelected(); });
 		this.renderGrid();
+	}
+
+	private async insertSelected(): Promise<void> {
+		const selected = this.items.filter((item) => this.selected.has(item.path));
+		if (!selected.length) {
+			new Notice('Select at least one item.');
+			return;
+		}
+		await this.options.onInsert(selected);
+		this.close();
 	}
 
 	private renderGrid(): void {
@@ -98,10 +100,10 @@ export class MediaPickerModal extends Modal {
 		card.toggleClass('is-selected', this.selected.has(item.path));
 		const preview = card.createDiv({ cls: 'ctk-media-preview' });
 		if (item.kind === 'image') {
-			const img = preview.createEl('img', { attr: { alt: item.name, loading: 'lazy' } }) as HTMLImageElement;
+			const img = preview.createEl('img', { attr: { alt: item.name, loading: 'lazy' } });
 			const file = this.hostApp.vault.getAbstractFileByPath(item.path);
-			if (file && 'path' in file) {
-				img.src = this.hostApp.vault.getResourcePath(file as TFile);
+			if (file instanceof TFile) {
+				img.src = this.hostApp.vault.getResourcePath(file);
 				img.addEventListener('load', () => {
 					item.width = img.naturalWidth;
 					item.height = img.naturalHeight;
@@ -110,16 +112,16 @@ export class MediaPickerModal extends Modal {
 				});
 			}
 		} else if (item.kind === 'audio') {
-			const audio = preview.createEl('audio', { attr: { controls: 'true' } }) as HTMLAudioElement;
+			const audio = preview.createEl('audio', { attr: { controls: 'true' } });
 			const file = this.hostApp.vault.getAbstractFileByPath(item.path);
 			if (file instanceof TFile) {
 				audio.src = this.hostApp.vault.getResourcePath(file);
 				audio.addEventListener('click', event => event.stopPropagation());
 			}
 		} else if (this.options.settings.previewPdf) {
-			const frame = preview.createEl('iframe', { title: item.name }) as HTMLIFrameElement;
+			const frame = preview.createEl('iframe', { attr: { title: item.name } });
 			const file = this.hostApp.vault.getAbstractFileByPath(item.path);
-			if (file && 'path' in file) frame.src = this.hostApp.vault.getResourcePath(file as TFile);
+			if (file instanceof TFile) frame.src = this.hostApp.vault.getResourcePath(file);
 		} else {
 			const icon = preview.createDiv({ cls: 'ctk-media-icon' });
 			setIcon(icon, 'file-text');
@@ -148,7 +150,7 @@ export async function insertIntoMarkdown(
 	view: MarkdownView,
 	items: MediaItem[],
 ): Promise<void> {
-	const editor = view.editor as Editor;
+	const editor = view.editor;
 	const lines = items.map((item) => `![[${item.path}]]`);
 	editor.replaceSelection(lines.join('\n'));
 }
