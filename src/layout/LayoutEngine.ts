@@ -5,7 +5,7 @@ export interface LayoutOptions { gapX?: number; gapY?: number; center?: {x:numbe
 
 export class LayoutEngine {
 	layout(data: CanvasDataModel, kind: LayoutKind, ids?: string[], options: LayoutOptions = {}): CanvasDataModel {
-		const result = structuredClone(data) as CanvasDataModel;
+		const result = structuredClone(data);
 		const selected = ids?.length ? result.nodes.filter(n => ids.includes(n.id)) : result.nodes;
 		if (selected.length < 2) return result;
 		const gapX = options.gapX ?? 80, gapY = options.gapY ?? 80;

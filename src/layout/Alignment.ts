@@ -4,7 +4,7 @@ export type AlignmentMode = 'left' | 'center' | 'right' | 'top' | 'middle' | 'bo
 export type DistributionMode = 'horizontal' | 'vertical';
 
 export function align(data: CanvasDataModel, ids: string[], mode: AlignmentMode): CanvasDataModel {
-	const result = structuredClone(data) as CanvasDataModel;
+	const result = structuredClone(data);
 	const nodes = result.nodes.filter(n => ids.includes(n.id));
 	if (nodes.length < 2) return result;
 	const minX = Math.min(...nodes.map(n=>n.x)), maxRight = Math.max(...nodes.map(n=>n.x+n.width));
@@ -19,7 +19,7 @@ export function align(data: CanvasDataModel, ids: string[], mode: AlignmentMode)
 }
 
 export function distribute(data: CanvasDataModel, ids: string[], mode: DistributionMode): CanvasDataModel {
-	const result = structuredClone(data) as CanvasDataModel;
+	const result = structuredClone(data);
 	const nodes = result.nodes.filter(n => ids.includes(n.id)).sort((a,b)=> mode==='horizontal' ? a.x-b.x : a.y-b.y);
 	if (nodes.length < 3) return result;
 	const first = nodes[0]!, last = nodes[nodes.length-1]!;
