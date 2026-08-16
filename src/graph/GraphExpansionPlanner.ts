@@ -16,7 +16,7 @@ export class VaultExpansionPlanner {
 
 	async plan(adapter: CanvasAdapter, options: VaultExpansionOptions): Promise<OperationPlan> {
 		const before = adapter.getData();
-		const after = structuredClone(before) as CanvasDataModel;
+		const after = structuredClone(before);
 		const pathToNode = new Map(after.nodes.filter(n => n.type === 'file' && n.file).map(n => [n.file!, n]));
 		const start = [...pathToNode.entries()].filter(([path, node]) => adapter.getSelectionIds().includes(node.id));
 		if (!start.length) throw new Error('Select at least one file node.');
