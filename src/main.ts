@@ -27,6 +27,10 @@ import { openAudioPlayer } from './media/AudioPlayerView';
 import { registerPhase6Commands } from './phase6';
 import { registerPhase7Commands } from './phase7';
 
+function isSettingsRecord(value: unknown): value is Partial<CanvasToolkitSettings> {
+	return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
 export default class CanvasToolkitPlugin extends Plugin {
 	settings!: CanvasToolkitSettings;
 	readonly journal = new OperationJournal();
@@ -243,8 +247,9 @@ export default class CanvasToolkitPlugin extends Plugin {
 	}
 
 	async loadSettings(): Promise<void> {
-		const raw = await this.loadData();
-		this.settings = { ...DEFAULT_SETTINGS, ...(raw as Partial<CanvasToolkitSettings> | null | undefined) };
+		const raw: unknown = await this.loadData();
+		const stored = isSettingsRecord(raw) ? raw : {};
+		this.settings = { ...DEFAULT_SETTINGS, ...stored };
 		this.normalizeSettings();
 	}
 	private normalizeSettings(): void {

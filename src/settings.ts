@@ -11,7 +11,7 @@ export class CanvasToolkitSettingTab extends PluginSettingTab {
 	display(): void {
 		const { containerEl } = this;
 		containerEl.empty();
-		new Setting(containerEl).setName('Canvas toolkit').setHeading();
+		new Setting(containerEl).setName('General').setHeading();
 
 		new Setting(containerEl)
 			.setName('Media folders')
@@ -20,8 +20,7 @@ export class CanvasToolkitSettingTab extends PluginSettingTab {
 				new FolderPickerModal(this.app, (folder) => {
 					if (!this.pluginRef.settings.mediaRoots.includes(folder.path)) {
 						this.pluginRef.settings.mediaRoots.push(folder.path);
-						void this.pluginRef.saveSettings();
-						this.display();
+						void this.pluginRef.saveSettings().then(() => this.display());
 					}
 				}).open();
 			}));
@@ -67,17 +66,17 @@ export class CanvasToolkitSettingTab extends PluginSettingTab {
 		new Setting(containerEl)
 			.setName('Layout spacing')
 			.setDesc('Default gap used by Canvas Toolkit layouts.')
-			.addSlider((slider: SliderComponent) => slider.setLimits(20, 240, 10).setValue(this.pluginRef.settings.layoutGap).setDynamicTooltip().onChange((value: number) => {
+			.addSlider((slider: SliderComponent) => slider.setLimits(20, 240, 10).setValue(this.pluginRef.settings.layoutGap).setDynamicTooltip().onChange(async (value: number) => {
 				this.pluginRef.settings.layoutGap = value;
-				void this.pluginRef.saveSettings();
+				await this.pluginRef.saveSettings();
 			}));
 
 		new Setting(containerEl)
 			.setName('Audio seek interval')
 			.setDesc('Seconds used by the audio player back/forward controls.')
-			.addSlider((slider: SliderComponent) => slider.setLimits(5, 30, 5).setValue(this.pluginRef.settings.audioSeekSeconds).setDynamicTooltip().onChange((value: number) => {
+			.addSlider((slider: SliderComponent) => slider.setLimits(5, 30, 5).setValue(this.pluginRef.settings.audioSeekSeconds).setDynamicTooltip().onChange(async (value: number) => {
 				this.pluginRef.settings.audioSeekSeconds = value;
-				void this.pluginRef.saveSettings();
+				await this.pluginRef.saveSettings();
 			}));
 
 		new Setting(containerEl)
