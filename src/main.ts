@@ -4,6 +4,8 @@ import {
 	Plugin,
 	MarkdownView,
 	ItemView,
+	Editor,
+	type MarkdownFileInfo,
 	TFile,
 	Menu,
 	type MenuItem,
@@ -129,8 +131,15 @@ export default class CanvasToolkitPlugin extends Plugin {
 		registerPhase6Commands(this);
 		registerPhase7Commands(this);
 
-		this.registerEvent(this.app.workspace.on('editor-menu', (menu: Menu, _editor: unknown, view: MarkdownView | ItemView) => {
-			if (view instanceof MarkdownView) menu.addItem((item: MenuItem) => item.setTitle('Insert media with preview').setIcon('image').onClick(() => void this.openMediaPicker(view)));
+		this.registerEvent(this.app.workspace.on('editor-menu', (menu: Menu, _editor: Editor, info: MarkdownView | MarkdownFileInfo) => {
+			if (info instanceof MarkdownView) {
+				menu.addItem((item: MenuItem) =>
+					item
+						.setTitle('Insert media with preview')
+						.setIcon('image')
+						.onClick(() => void this.openMediaPicker(info))
+				);
+			}
 		}));
 
 		this.app.workspace.onLayoutReady(() => {
