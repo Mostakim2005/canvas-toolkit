@@ -4,14 +4,12 @@ import {
 	Plugin,
 	MarkdownView,
 	ItemView,
-	Editor,
-	type MarkdownFileInfo,
 	TFile,
 	Menu,
 	type MenuItem,
 } from 'obsidian';
 import { CanvasToolkitSettingTab } from './settings';
-import { DEFAULT_SETTINGS, type CanvasToolkitSettings, type CanvasRule, type MediaItem } from './types';
+import { DEFAULT_SETTINGS, type CanvasToolkitSettings, type CanvasRule } from './types';
 import { CanvasAdapter } from './canvas/CanvasAdapter';
 import { GraphAnalyzer } from './graph/GraphAnalyzer';
 import { OperationJournal } from './operations/OperationJournal';
@@ -93,21 +91,21 @@ export default class CanvasToolkitPlugin extends Plugin {
 			},
 		});
 		this.addCommand({
-			id: 'canvas-undo-toolkit', name: 'Canvas Toolkit: undo',
+			id: 'canvas-undo-toolkit', name: 'Undo',
 			checkCallback: (checking: boolean) => {
 				if (!this.transactionEngine.canUndo()) return false;
 				if (!checking) void this.transactionEngine.undo(this.currentCanvas()); return true;
 			},
 		});
 		this.addCommand({
-			id: 'canvas-redo-toolkit', name: 'Canvas Toolkit: redo',
+			id: 'canvas-redo-toolkit', name: 'Redo',
 			checkCallback: (checking: boolean) => {
 				if (!this.transactionEngine.canRedo()) return false;
 				if (!checking) void this.transactionEngine.redo(this.currentCanvas()); return true;
 			},
 		});
 		this.addCommand({
-			id: 'inspect-current-canvas', name: 'Inspect current Canvas graph',
+			id: 'inspect-current-canvas', name: 'Inspect current canvas graph',
 			checkCallback: (checking: boolean) => {
 				const adapter = this.currentCanvas(); if (!adapter) return false;
 				if (!checking) {
@@ -131,15 +129,8 @@ export default class CanvasToolkitPlugin extends Plugin {
 		registerPhase6Commands(this);
 		registerPhase7Commands(this);
 
-		this.registerEvent(this.app.workspace.on('editor-menu', (menu: Menu, _editor: Editor, info: MarkdownView | MarkdownFileInfo) => {
-			if (info instanceof MarkdownView) {
-				menu.addItem((item: MenuItem) =>
-					item
-						.setTitle('Insert media with preview')
-						.setIcon('image')
-						.onClick(() => void this.openMediaPicker(info))
-				);
-			}
+		this.registerEvent(this.app.workspace.on('editor-menu', (menu: Menu, _editor: unknown, view: MarkdownView | ItemView) => {
+			if (view instanceof MarkdownView) menu.addItem((item: MenuItem) => item.setTitle('Insert media with preview').setIcon('image').onClick(() => void this.openMediaPicker(view)));
 		}));
 
 		this.app.workspace.onLayoutReady(() => {
@@ -188,12 +179,12 @@ export default class CanvasToolkitPlugin extends Plugin {
 	}
 	private async applyMissingEdges(adapter: CanvasAdapter): Promise<void> {
 		const plan = await this.relationshipEngine.planAddMissingCanvasEdges(adapter);
-		if (!plan.changes.some(change => change.type === 'replace-canvas' && change.before.edges.length !== change.after.edges.length)) { new Notice('Canvas Toolkit: no missing Canvas connections found.'); return; }
+		if (!plan.changes.some(change => change.type === 'replace-canvas' && change.before.edges.length !== change.after.edges.length)) { new Notice('No missing canvas connections found.'); return; }
 		new OperationPreviewModal(this.app, plan, this.transactionEngine, adapter).open();
 	}
 	private async previewMissingMarkdown(adapter: CanvasAdapter): Promise<void> {
 		const plan = await this.relationshipEngine.planAddMissingMarkdownLinks(adapter);
-		if (!plan.changes.length) { new Notice('Canvas Toolkit: no missing Markdown links found.'); return; }
+		if (!plan.changes.length) { new Notice('No missing Markdown links found.'); return; }
 		new OperationPreviewModal(this.app, plan, this.transactionEngine, adapter).open();
 	}
 	private async handleAutoSync(): Promise<void> {
@@ -228,7 +219,7 @@ export default class CanvasToolkitPlugin extends Plugin {
 					return;
 				}
 				const before = target.getData();
-				const after = structuredClone(before) as import('./types').CanvasDataModel;
+				const after = structuredClone(before);
 				const existingIds = new Set(after.nodes.map(node => node.id));
 				const columns = Math.max(1, Math.ceil(Math.sqrt(items.length)));
 				const cellWidth = 520, cellHeight = 420;
@@ -259,7 +250,7 @@ export default class CanvasToolkitPlugin extends Plugin {
 			? [...new Set(this.settings.mediaRoots.filter((v): v is string => typeof v === 'string').map(value => normalizePath(value.trim())).filter(Boolean))]
 			: [];
 		this.settings.mediaGridColumns = this.settings.mediaGridColumns === 2 ? 2 : 3;
-		this.settings.defaultMediaKind = ['image','pdf','both','audio','all'].includes(this.settings.defaultMediaKind) ? this.settings.defaultMediaKind : 'all';
+		this.settings.defaultMediaKind = normalizeMediaKind(this.settings.defaultMediaKind);
 		this.settings.audioWaveformPoints = Number.isFinite(this.settings.audioWaveformPoints) ? Math.min(600, Math.max(60, this.settings.audioWaveformPoints)) : 180;
 		this.settings.audioSeekSeconds = Number.isFinite(this.settings.audioSeekSeconds) ? Math.min(120, Math.max(1, this.settings.audioSeekSeconds)) : 10;
 		this.settings.layoutGap = Number.isFinite(this.settings.layoutGap) ? Math.min(500, Math.max(10, this.settings.layoutGap)) : 80;
@@ -274,6 +265,10 @@ export default class CanvasToolkitPlugin extends Plugin {
 	async saveSettings(): Promise<void> { await this.saveData(this.settings); }
 }
 
+
+function normalizeMediaKind(value: unknown): CanvasToolkitSettings['defaultMediaKind'] {
+	return value === 'image' || value === 'pdf' || value === 'both' || value === 'audio' || value === 'all' ? value : 'all';
+}
 
 function isValidPreset(value: unknown): value is import('./types').LayoutPreset {
 	if (!value || typeof value !== 'object') return false;

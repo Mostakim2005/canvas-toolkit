@@ -59,8 +59,8 @@ export class GraphInsightsModal extends Modal {
 		if (!adapter) return;
 		const data = adapter.getData();
 		const duplicatePairs = duplicatePairsForCleanup(data);
-		if (!duplicatePairs.size) { new Notice('Canvas Toolkit: no safe duplicate-edge cleanup is available.'); return; }
-		const after = structuredClone(data) as CanvasDataModel;
+		if (!duplicatePairs.size) { new Notice('No safe duplicate-edge cleanup is available.'); return; }
+		const after = structuredClone(data);
 		const seen = new Set<string>();
 		after.edges = after.edges.filter(edge => {
 			const key = `${edge.fromNode}\u0000${edge.toNode}`;

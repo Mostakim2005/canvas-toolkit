@@ -28,7 +28,7 @@ export class Phase5Modal extends Modal {
 	constructor(app: App, private readonly plugin: CanvasToolkitPlugin) { super(app); }
 	onOpen(): void {
 		this.modalEl.addClass('ctk-modal', 'ctk-phase5-modal');
-		this.titleEl.setText('Canvas Toolkit power tools');
+		this.titleEl.setText('Canvas toolkit power tools');
 		this.render();
 	}
 	onClose(): void { this.contentEl.empty(); }
@@ -48,7 +48,7 @@ export class Phase5Modal extends Modal {
 			const apply = row.createEl('button', { text: 'Apply' });
 			apply.addEventListener('click', () => {
 				const adapter = this.plugin.currentCanvas();
-				if (!adapter) { new Notice('Open a Canvas first.'); return; }
+				if (!adapter) { new Notice('Open a canvas first.'); return; }
 				const before = adapter.getData();
 				const after = new LayoutEngine().layout(before, preset.kind, adapter.getSelectionIds().length ? adapter.getSelectionIds() : undefined, { gapX: preset.gapX, gapY: preset.gapY });
 				const planner = new OperationPlanner();
@@ -56,26 +56,26 @@ export class Phase5Modal extends Modal {
 				new OperationPreviewModal(this.app, plan, this.plugin.transactionEngine, adapter).open();
 			});
 			const remove = row.createEl('button', { text: 'Remove' });
-			remove.addEventListener('click', async () => { this.plugin.settings.layoutPresets.splice(index, 1); await this.plugin.saveSettings(); this.render(); });
+			remove.addEventListener('click', () => { this.plugin.settings.layoutPresets.splice(index, 1); void this.plugin.saveSettings().then(() => this.render()); });
 		}
 		const actions = section.createDiv({ cls: 'ctk-inline-row' });
-		const name = actions.createEl('input', { placeholder: 'Preset name' }) as HTMLInputElement;
-		const kind = actions.createEl('select') as HTMLSelectElement;
+		const name = actions.createEl('input', { placeholder: 'Preset name' });
+		const kind = actions.createEl('select');
 		for (const value of ['grid','hierarchical','radial','mind-map','compact'] as const) kind.createEl('option', { value, text: value });
-		actions.createEl('button', { text: 'Save current preset' }).addEventListener('click', async () => {
+		actions.createEl('button', { text: 'Save current preset' }).addEventListener('click', () => {
 			if (!name.value.trim()) return;
 			this.plugin.settings.layoutPresets.push({ name: name.value.trim(), kind: kind.value as LayoutPreset['kind'], gapX: this.plugin.settings.layoutGap, gapY: this.plugin.settings.layoutGap });
-			await this.plugin.saveSettings(); this.render();
+			void this.plugin.saveSettings().then(() => this.render());
 		});
 	}
 	private addRuleSection(): void {
 		const section = this.contentEl.createDiv({ cls: 'ctk-control-section' });
-		section.createEl('h3', { text: 'Per-Canvas rules' });
+		section.createEl('h3', { text: 'Per-canvas rules' });
 		const path = this.plugin.currentCanvasPath() ?? '';
-		section.createDiv({ cls: 'ctk-operation-summary', text: path ? `Current Canvas: ${path}` : 'Open a Canvas to configure a rule.' });
+		section.createDiv({ cls: 'ctk-operation-summary', text: path ? `Current canvas: ${path}` : 'Open a Canvas to configure a rule.' });
 		if (!path) return;
 		let rule = this.plugin.getCanvasRule(path);
-		const sync = section.createEl('select') as HTMLSelectElement;
+		const sync = section.createEl('select');
 		for (const value of ['off','suggest','apply'] as const) sync.createEl('option', { value, text: `Sync: ${value}` });
 		sync.value = rule?.syncMode ?? this.plugin.settings.syncMode;
 		const save = () => void this.plugin.setCanvasRule({ canvasPath: path, syncMode: sync.value as CanvasRule['syncMode'], autoOptimizeConnections: rule?.autoOptimizeConnections ?? false, snapEnabled: rule?.snapEnabled ?? this.plugin.settings.snapEnabled, snapGridSize: rule?.snapGridSize ?? this.plugin.settings.snapGridSize, defaultLayout: rule?.defaultLayout });
@@ -86,8 +86,8 @@ export class Phase5Modal extends Modal {
 		const section = this.contentEl.createDiv({ cls: 'ctk-control-section' });
 		section.createEl('h3', { text: 'Configuration' });
 		const actions = section.createDiv({ cls: 'ctk-inline-row' });
-		actions.createEl('button', { text: 'Export settings' }).addEventListener('click', async () => {
-			await navigator.clipboard.writeText(JSON.stringify(this.plugin.exportConfiguration(), null, 2)); new Notice('Canvas Toolkit: settings copied to clipboard.');
+		actions.createEl('button', { text: 'Export settings' }).addEventListener('click', () => {
+			void navigator.clipboard.writeText(JSON.stringify(this.plugin.exportConfiguration(), null, 2)).then(() => new Notice('Settings copied to clipboard.'));
 		});
 		actions.createEl('button', { text: 'Import settings' }).addEventListener('click', () => new ImportSettingsModal(this.app, this.plugin, () => this.render()).open());
 	}
@@ -97,13 +97,20 @@ class ImportSettingsModal extends Modal {
 	constructor(app: App, private readonly plugin: CanvasToolkitPlugin, private readonly refresh: () => void) { super(app); }
 	onOpen(): void {
 		this.modalEl.addClass('ctk-modal'); this.titleEl.setText('Import settings');
-		const area = this.contentEl.createEl('textarea', { placeholder: 'Paste exported JSON…' }) as HTMLTextAreaElement;
-		area.style.width = '100%'; area.style.minHeight = '260px';
+		const area = this.contentEl.createEl('textarea', { placeholder: 'Paste exported JSON…' });
+		area.addClass('ctk-import-settings-textarea');
 		const button = this.contentEl.createEl('button', { text: 'Import' }); button.addClass('mod-cta');
-		button.addEventListener('click', async () => {
-			try { await this.plugin.importConfiguration(JSON.parse(area.value) as unknown); new Notice('Canvas Toolkit: settings imported.'); this.refresh(); this.close(); }
-			catch (error) { new Notice(`Canvas Toolkit: ${error instanceof Error ? error.message : 'invalid JSON'}`); }
-		});
+		button.addEventListener('click', () => { void this.importSettings(area.value); });
+	}
+	private async importSettings(value: string): Promise<void> {
+		try {
+			await this.plugin.importConfiguration(JSON.parse(value) as unknown);
+			new Notice('Settings imported.');
+			this.refresh();
+			this.close();
+		} catch (error) {
+			new Notice(`Canvas Toolkit: ${error instanceof Error ? error.message : 'Invalid JSON'}`);
+		}
 	}
 	onClose(): void { this.contentEl.empty(); }
 }
