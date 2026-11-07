@@ -42,6 +42,7 @@ export default class CanvasToolkitPlugin extends Plugin {
 
 	async onload(): Promise<void> {
 		await this.loadSettings();
+		this.applyThemePreferences();
 		this.addSettingTab(new CanvasToolkitSettingTab(this.app, this));
 
 		this.addCommand({
@@ -268,8 +269,14 @@ export default class CanvasToolkitPlugin extends Plugin {
 		this.settings.canvasRules = Array.isArray(this.settings.canvasRules) ? this.settings.canvasRules.filter(isValidCanvasRule) : [];
 		this.settings.showGraphInsightsOnOpen = Boolean(this.settings.showGraphInsightsOnOpen);
 		this.settings.defaultLinkMode = this.settings.defaultLinkMode === 'semantic' || this.settings.defaultLinkMode === 'both' ? this.settings.defaultLinkMode : 'visual';
+		this.settings.glassmorphism = this.settings.glassmorphism !== false;
 	}
 	async saveSettings(): Promise<void> { await this.saveData(this.settings); }
+	onunload(): void { document.body.removeClass('ctk-glassmorphic'); }
+	applyThemePreferences(): void {
+		if (this.settings.glassmorphism !== false) document.body.addClass('ctk-glassmorphic');
+		else document.body.removeClass('ctk-glassmorphic');
+	}
 }
 
 

@@ -111,6 +111,15 @@ export class CanvasToolkitSettingTab extends PluginSettingTab {
 				this.pluginRef.settings.snapEnabled = value;
 				void this.pluginRef.saveSettings();
 			}));
+
+		new Setting(containerEl)
+			.setName('Frosted Glassmorphism & Material 3')
+			.setDesc('Apply translucent frosted glass surfaces, backdrop blurs, luminous borders, and fluid container responsiveness.')
+			.addToggle((toggle: ToggleComponent) => toggle.setValue(this.pluginRef.settings.glassmorphism !== false).onChange(async (value: boolean) => {
+				this.pluginRef.settings.glassmorphism = value;
+				await this.pluginRef.saveSettings();
+				this.pluginRef.applyThemePreferences();
+			}));
 	}
 }
 

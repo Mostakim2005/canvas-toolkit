@@ -1,6 +1,6 @@
 import { TFile, type App } from 'obsidian';
 import type { CanvasAdapter } from '../canvas/CanvasAdapter';
-import type { CanvasDataModel, MarkdownChange, OperationPlan, PlannedChange, ReconciliationResult, RelationshipCandidate, RelationshipLinkMode } from '../types';
+import type { MarkdownChange, OperationPlan, PlannedChange, ReconciliationResult, RelationshipCandidate, RelationshipLinkMode } from '../types';
 import { GraphModelBuilder, type GraphModel } from '../graph/GraphModel';
 import { OperationPlanner } from '../operations/OperationPlanner';
 

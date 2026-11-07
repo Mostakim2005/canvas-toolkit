@@ -1,6 +1,6 @@
 import { TFile, type App } from 'obsidian';
 import type { CanvasAdapter } from '../canvas/CanvasAdapter';
-import type { CanvasDataModel, CanvasNodeModel, OperationPlan } from '../types';
+import type { CanvasNodeModel, OperationPlan } from '../types';
 import { OperationPlanner } from '../operations/OperationPlanner';
 
 export interface VaultExpansionOptions {

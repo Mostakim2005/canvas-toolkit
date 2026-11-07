@@ -21,6 +21,7 @@ export class MediaPickerModal extends Modal {
 	private query = '';
 	private filter: 'image' | 'pdf' | 'audio' | 'all' = 'all';
 	private gridColumns: 2 | 3;
+	private searchDebounce?: number;
 
 	private readonly hostApp: App;
 
@@ -39,6 +40,7 @@ export class MediaPickerModal extends Modal {
 	}
 
 	onClose(): void {
+		if (this.searchDebounce) window.clearTimeout(this.searchDebounce);
 		this.contentEl.empty();
 	}
 
@@ -50,6 +52,14 @@ export class MediaPickerModal extends Modal {
 		search.value = this.query;
 		search.addEventListener('input', () => {
 			this.query = search.value.trim().toLowerCase();
+			window.clearTimeout(this.searchDebounce);
+			this.searchDebounce = window.setTimeout(() => this.renderGrid(), 120);
+		});
+		search.addEventListener('keydown', (event: KeyboardEvent) => {
+			if (event.key !== 'Escape') return;
+			search.value = '';
+			this.query = '';
+			window.clearTimeout(this.searchDebounce);
 			this.renderGrid();
 		});
 		const controls = toolbar.createDiv({ cls: 'ctk-toolbar-group' });

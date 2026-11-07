@@ -195,6 +195,7 @@ export interface CanvasToolkitSettings {
 	canvasRules: CanvasRule[];
 	showGraphInsightsOnOpen: boolean;
 	defaultLinkMode: RelationshipLinkMode;
+	glassmorphism: boolean;
 }
 
 export const DEFAULT_SETTINGS: CanvasToolkitSettings = {
@@ -220,4 +221,5 @@ export const DEFAULT_SETTINGS: CanvasToolkitSettings = {
 	canvasRules: [],
 	showGraphInsightsOnOpen: false,
 	defaultLinkMode: 'visual',
+	glassmorphism: true,
 };

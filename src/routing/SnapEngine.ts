@@ -1,5 +1,5 @@
 import type { CanvasDataModel, CanvasNodeModel } from '../types';
-import { overlapArea, snapRect, type Rect } from '../geometry';
+import { overlapArea, snapRect } from '../geometry';
 
 export interface SnapOptions {
 	grid?: number;

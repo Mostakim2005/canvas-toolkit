@@ -73,3 +73,173 @@
 @media (max-width: 640px) { .ctk-insights-metrics { grid-template-columns:repeat(2,minmax(0,1fr)); } }
 
 .ctk-import-settings-textarea { width: 100%; min-height: 260px; }
+
+/* ==========================================================================
+   Hybrid Frosted Glassmorphism + Material 3 Design System
+   ========================================================================== */
+
+:root {
+  --ctk-glass-surface: rgba(var(--mono-rgb-100, 255, 255, 255), 0.72);
+  --ctk-glass-surface-subtle: rgba(var(--mono-rgb-100, 255, 255, 255), 0.50);
+  --ctk-glass-surface-elevated: rgba(var(--mono-rgb-100, 255, 255, 255), 0.85);
+  --ctk-glass-border: rgba(var(--mono-rgb-0, 0, 0), 0.08);
+  --ctk-glass-border-luminous: rgba(var(--interactive-accent-rgb, 100, 108, 255), 0.28);
+  --ctk-glass-blur: blur(16px) saturate(160%);
+  --ctk-glass-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06);
+  --ctk-glass-shadow-md: 0 8px 24px -4px rgba(0, 0, 0, 0.08), 0 2px 6px -1px rgba(0, 0, 0, 0.04);
+  --ctk-glass-shadow-lg: 0 16px 36px -6px rgba(0, 0, 0, 0.16), 0 6px 12px -2px rgba(0, 0, 0, 0.08);
+}
+
+.theme-dark {
+  --ctk-glass-surface: rgba(24, 26, 32, 0.75);
+  --ctk-glass-surface-subtle: rgba(18, 20, 24, 0.55);
+  --ctk-glass-surface-elevated: rgba(30, 34, 42, 0.85);
+  --ctk-glass-border: rgba(255, 255, 255, 0.09);
+  --ctk-glass-border-luminous: rgba(var(--interactive-accent-rgb, 100, 108, 255), 0.35);
+  --ctk-glass-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.24);
+  --ctk-glass-shadow-md: 0 10px 28px rgba(0, 0, 0, 0.35);
+  --ctk-glass-shadow-lg: 0 20px 48px rgba(0, 0, 0, 0.55);
+}
+
+body:not(.ctk-glassmorphic) {
+  --ctk-glass-surface: var(--background-secondary);
+  --ctk-glass-surface-subtle: var(--background-primary);
+  --ctk-glass-surface-elevated: var(--background-primary-alt);
+  --ctk-glass-border: var(--background-modifier-border);
+  --ctk-glass-blur: none;
+}
+
+/* Glassmorphic Modal & Card Overrides */
+body.ctk-glassmorphic .ctk-modal .modal-content {
+  background: var(--ctk-glass-surface-elevated) !important;
+  backdrop-filter: var(--ctk-glass-blur) !important;
+  -webkit-backdrop-filter: var(--ctk-glass-blur) !important;
+  border: 1px solid var(--ctk-glass-border-luminous) !important;
+  box-shadow: var(--ctk-glass-shadow-lg) !important;
+  border-radius: 16px;
+}
+
+body.ctk-glassmorphic .ctk-media-card {
+  background: var(--ctk-glass-surface);
+  backdrop-filter: var(--ctk-glass-blur);
+  -webkit-backdrop-filter: var(--ctk-glass-blur);
+  border: 1px solid var(--ctk-glass-border);
+  box-shadow: var(--ctk-glass-shadow-sm);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  border-radius: 12px;
+}
+
+body.ctk-glassmorphic .ctk-media-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--ctk-glass-border-luminous);
+  box-shadow: var(--ctk-glass-shadow-md);
+}
+
+body.ctk-glassmorphic .ctk-media-card.is-selected {
+  border-color: var(--interactive-accent);
+  box-shadow: 0 0 0 2px var(--interactive-accent), var(--ctk-glass-shadow-md);
+}
+
+body.ctk-glassmorphic .ctk-operation-row {
+  background: var(--ctk-glass-surface);
+  backdrop-filter: var(--ctk-glass-blur);
+  -webkit-backdrop-filter: var(--ctk-glass-blur);
+  border: 1px solid var(--ctk-glass-border);
+  box-shadow: var(--ctk-glass-shadow-sm);
+  border-radius: 10px;
+}
+
+body.ctk-glassmorphic .ctk-warning-box {
+  background: rgba(234, 179, 8, 0.12);
+  backdrop-filter: var(--ctk-glass-blur);
+  -webkit-backdrop-filter: var(--ctk-glass-blur);
+  border: 1px solid rgba(234, 179, 8, 0.35);
+  box-shadow: var(--ctk-glass-shadow-sm);
+  border-radius: 10px;
+}
+
+body.ctk-glassmorphic .ctk-relationship-source {
+  background: var(--ctk-glass-surface);
+  backdrop-filter: var(--ctk-glass-blur);
+  -webkit-backdrop-filter: var(--ctk-glass-blur);
+  border: 1px solid var(--ctk-glass-border);
+}
+
+body.ctk-glassmorphic .ctk-relationship-target {
+  background: var(--ctk-glass-surface-subtle);
+  border: 1px solid var(--ctk-glass-border);
+  transition: all 0.15s ease;
+}
+
+body.ctk-glassmorphic .ctk-relationship-target:hover {
+  background: var(--ctk-glass-surface);
+  border-color: var(--ctk-glass-border-luminous);
+  transform: translateX(2px);
+}
+
+body.ctk-glassmorphic .ctk-insight-metric {
+  background: var(--ctk-glass-surface);
+  backdrop-filter: var(--ctk-glass-blur);
+  -webkit-backdrop-filter: var(--ctk-glass-blur);
+  border: 1px solid var(--ctk-glass-border);
+  box-shadow: var(--ctk-glass-shadow-sm);
+}
+
+body.ctk-glassmorphic .ctk-insight-row {
+  background: var(--ctk-glass-surface-subtle);
+  backdrop-filter: var(--ctk-glass-blur);
+  -webkit-backdrop-filter: var(--ctk-glass-blur);
+  border: 1px solid var(--ctk-glass-border);
+}
+
+body.ctk-glassmorphic .ctk-audio-waveform {
+  background: var(--ctk-glass-surface-subtle);
+  backdrop-filter: var(--ctk-glass-blur);
+  -webkit-backdrop-filter: var(--ctk-glass-blur);
+  border: 1px solid var(--ctk-glass-border);
+}
+
+/* Material 3 Symmetrical Controls */
+.ctk-modal button {
+  border-radius: 9999px;
+  padding: 0.45rem 1.15rem;
+  font-weight: 500;
+  transition: all 0.15s ease;
+}
+
+.ctk-modal input[type="search"],
+.ctk-modal select {
+  border-radius: 8px;
+  border: 1px solid var(--background-modifier-border);
+  background: var(--background-primary);
+  padding: 0.4rem 0.75rem;
+}
+
+.ctk-modal input[type="search"]:focus,
+.ctk-modal select:focus {
+  border-color: var(--interactive-accent);
+  box-shadow: 0 0 0 2px rgba(var(--interactive-accent-rgb, 100, 108, 255), 0.2);
+}
+
+/* Fluid Container Queries */
+.ctk-modal .modal-content {
+  container-type: inline-size;
+  container-name: ctkModal;
+}
+
+@container ctkModal (max-width: 640px) {
+  .ctk-media-grid.ctk-grid-3,
+  .ctk-media-grid.ctk-grid-2 {
+    grid-template-columns: 1fr;
+  }
+  .ctk-insights-metrics {
+    grid-template-columns: 1fr 1fr;
+  }
+  .ctk-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .ctk-toolbar-group {
+    justify-content: space-between;
+  }
+}
