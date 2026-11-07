@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Canvas Toolkit — Visual Guide</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --panel: #151b23;
+    --panel-2: #1c2530;
+    --ink: #e6edf3;
+    --muted: #94a3b8;
+    --line: #273140;
+    --accent: #7dd3fc;
+    --accent-dim: #12303f;
+    --violet: #c4b5fd;
+    --amber: #fbbf24;
+    --red: #f87171;
+    --green: #86efac;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: radial-gradient(1100px 540px at 15% -10%, #12303f 0%, var(--bg) 55%);
+    color: var(--ink);
+    font: 15px/1.6 "Segoe UI", system-ui, -apple-system, sans-serif;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 40px 24px 80px; }
+  header.hero {
+    border: 1px solid var(--line);
+    background: linear-gradient(135deg, rgba(125,211,252,.10), rgba(196,181,253,.05));
+    border-radius: 18px;
+    padding: 32px;
+    margin-bottom: 26px;
+  }
+  .eyebrow { color: var(--accent); font-size: 12px; letter-spacing: .18em; text-transform: uppercase; }
+  h1 { font-size: 38px; line-height: 1.15; margin: 10px 0 12px; }
+  h1 span { color: var(--accent); }
+  .lede { color: var(--muted); max-width: 780px; margin: 0; font-size: 16px; }
+  nav.toc { display: flex; flex-wrap: wrap; gap: 10px; margin: 24px 0 32px; }
+  nav.toc a {
+    border: 1px solid var(--line);
+    background: var(--panel);
+    padding: 7px 12px;
+    border-radius: 999px;
+    color: var(--ink);
+    font-size: 13px;
+  }
+  section { margin: 36px 0; }
+  h2 { font-size: 22px; margin: 0 0 6px; }
+  .sub { color: var(--muted); margin: 0 0 18px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 18px;
+  }
+  .card h3 { margin: 0 0 6px; font-size: 15px; color: var(--accent); }
+  .card p { margin: 0; color: var(--muted); font-size: 14px; }
+  .pill { display: inline-block; font-size: 11px; letter-spacing: .04em; padding: 2px 8px; border-radius: 999px; margin-bottom: 8px; }
+  .pill.ok { background: var(--accent-dim); color: var(--accent); }
+  .pill.warn { background: #3b2f13; color: var(--amber); }
+  .pill.bad { background: #3b1616; color: var(--red); }
+  .arch {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 22px;
+    overflow-x: auto;
+  }
+  .lanes { display: grid; grid-template-columns: repeat(4, minmax(190px, 1fr)); gap: 14px; min-width: 840px; }
+  .lane { background: var(--panel-2); border: 1px solid var(--line); border-radius: 12px; padding: 14px; }
+  .lane h4 { margin: 0 0 10px; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+  .node { background: #101720; border: 1px solid var(--line); border-left: 3px solid var(--accent); border-radius: 8px; padding: 9px 11px; font-size: 13px; margin-bottom: 8px; }
+  .node small { display: block; color: var(--muted); font-size: 11px; }
+  table { width: 100%; border-collapse: collapse; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+  th, td { text-align: left; padding: 11px 14px; border-bottom: 1px solid var(--line); font-size: 14px; vertical-align: top; }
+  th { background: var(--panel-2); color: var(--muted); font-weight: 600; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; }
+  tr:last-child td { border-bottom: none; }
+  code { font-family: "Cascadia Code", Consolas, monospace; font-size: 12.5px; color: var(--violet); }
+  .flow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 12px 0; }
+  .step { background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px; padding: 7px 11px; font-size: 13px; }
+  .arrow { color: var(--muted); }
+  .trap { border-left: 3px solid var(--red); }
+  .trap h3 { color: var(--red); }
+  .good h3 { color: var(--green); }
+  footer { margin-top: 48px; color: var(--muted); font-size: 13px; border-top: 1px solid var(--line); padding-top: 18px; }
+  .kbd { border: 1px solid var(--line); background: #0d141c; border-radius: 5px; padding: 1px 6px; font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <div class="eyebrow">Obsidian plugin · visual guide</div>
+    <h1>Canvas <span>Toolkit</span></h1>
+    <p class="lede">Layouts, snapping, connector routing, two-way Markdown synchronization, graph diagnostics, and a preview-first media picker for Obsidian Canvas. Nothing is written until a review dialog is confirmed, and everything can be undone.</p>
+  </header>
+
+  <nav class="toc">
+    <a href="#intent">Intent</a>
+    <a href="#architecture">Architecture</a>
+    <a href="#flow">Safe write flow</a>
+    <a href="#features">Feature contract</a>
+    <a href="#decisions">Decisions</a>
+    <a href="#traps">Traps</a>
+    <a href="#verify">Verification</a>
+  </nav>
+
+  <section id="intent">
+    <h2>What it is for</h2>
+    <p class="sub">The short version a new maintainer needs before touching code.</p>
+    <div class="grid">
+      <div class="card"><h3>Arrange in one command</h3><p>Five layouts plus align, distribute, and snap, applied to a selection or the whole canvas.</p></div>
+      <div class="card"><h3>Never lose an arrangement</h3><p>Every change is a previewable, reversible transaction with undo and redo.</p></div>
+      <div class="card"><h3>Cleaner connectors</h3><p>Edges are re-anchored across all 16 side pairs with a crossing penalty.</p></div>
+      <div class="card"><h3>Canvas meets Markdown</h3><p>Missing edges and missing wikilinks are detected both ways and added safely.</p></div>
+      <div class="card"><h3>See graph health</h3><p>Duplicates, dangling edges, isolates, hubs, and a health score for the open canvas.</p></div>
+      <div class="card"><h3>Preview before inserting</h3><p>Images, PDFs, and audio browsed as cards, with resolution, size, and waveform playback.</p></div>
+    </div>
+  </section>
+
+  <section id="architecture">
+    <h2>System map</h2>
+    <p class="sub">UI builds plans; only the transaction engine writes to the vault.</p>
+    <div class="arch">
+      <div class="lanes">
+        <div class="lane">
+          <h4>UI</h4>
+          <div class="node">CanvasGeometryModal<small>layout · align · snap</small></div>
+          <div class="node">Phase5Modal<small>presets · rules · export</small></div>
+          <div class="node">Connect / Unlink<small>visual + semantic</small></div>
+          <div class="node">GraphInsightsModal<small>score · cleanup</small></div>
+          <div class="node">MediaPicker / Audio<small>grid · waveform</small></div>
+          <div class="node">OperationPreviewModal<small>review · apply</small></div>
+        </div>
+        <div class="lane">
+          <h4>Core</h4>
+          <div class="node">CanvasToolkitPlugin<small>commands · auto-sync</small></div>
+          <div class="node">OperationPlanner<small>plan · snapshots</small></div>
+          <div class="node">TransactionEngine<small>commit · undo · redo</small></div>
+        </div>
+        <div class="lane">
+          <h4>Domain</h4>
+          <div class="node">CanvasAdapter<small>parse · preserve extra</small></div>
+          <div class="node">Layout / Snap / Optimize<small>pure geometry</small></div>
+          <div class="node">RelationshipEngine<small>reconcile · link</small></div>
+          <div class="node">VaultExpansionPlanner<small>BFS with budgets</small></div>
+          <div class="node">MediaScanner / Audio<small>scan · waveform</small></div>
+        </div>
+        <div class="lane">
+          <h4>Host</h4>
+          <div class="node">Canvas view<small>getData · setData · save</small></div>
+          <div class="node">vault.process<small>atomic background writes</small></div>
+          <div class="node">metadataCache<small>resolved + unresolved</small></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="flow">
+    <h2>Safe write flow</h2>
+    <p class="sub">The same five steps cover layouts, snapshots, links, expansion, and media insertion.</p>
+    <div class="arch">
+      <div class="flow">
+        <span class="step">build after-model</span>
+        <span class="arrow">→</span>
+        <span class="step">OperationPlanner</span>
+        <span class="arrow">→</span>
+        <span class="step">Review changes</span>
+        <span class="arrow">→</span>
+        <span class="step">verify before-state</span>
+        <span class="arrow">→</span>
+        <span class="step">commit + undo entry</span>
+      </div>
+      <table>
+        <thead><tr><th>Stage</th><th>Rule</th><th>Failure behaviour</th></tr></thead>
+        <tbody>
+          <tr><td>Plan</td><td>Deep-cloned before and after; unknown canvas fields preserved.</td><td>Nothing written.</td></tr>
+          <tr><td>Review</td><td>Lists every file and warning; warnings never block.</td><td>Cancel closes with no change.</td></tr>
+          <tr><td>Verify</td><td>Canonical JSON must equal the preview snapshot.</td><td>Throws <em>changed since preview</em>.</td></tr>
+          <tr><td>Write</td><td>Active canvas uses <code>setData</code> + <code>requestSave</code>; others use <code>vault.process</code>.</td><td>Rollback to the before snapshot.</td></tr>
+          <tr><td>History</td><td>One record per commit, trimmed to <code>journalLimit</code>, redo cleared.</td><td>Undo refuses if state drifted.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="features">
+    <h2>Feature contract</h2>
+    <p class="sub">If a change breaks one of these, it is a regression, not a refactor.</p>
+    <div class="grid">
+      <div class="card"><h3>Selection awareness</h3><p>With one or more nodes selected, layouts, align, and snap act on the selection only.</p></div>
+      <div class="card"><h3>Append-only notes</h3><p>Markdown sync adds missing wikilinks at the footer and never rewrites prose.</p></div>
+      <div class="card"><h3>Opt-in auto-sync</h3><p>Background reconciliation defaults to off; per-canvas rules override globally.</p></div>
+      <div class="card"><h3>Budgeted expansion</h3><p>Expansion stops at 2 hops, 100 nodes, 250 edges and never covers existing cards.</p></div>
+      <div class="card"><h3>Responsive picker</h3><p>Search debounces 120 ms, Escape clears, and close cancels the timer.</p></div>
+      <div class="card"><h3>Waveform limits</h3><p>Decode caps at 15 minutes, cached by path + mtime, context always closed.</p></div>
+      <div class="card"><h3>Graph honesty</h3><p>Health score is advisory; cleanup removes only true duplicate edge pairs.</p></div>
+      <div class="card"><h3>Scoped styling</h3><p>Every class is <code>ctk-*</code>; the glass body class leaves on unload.</p></div>
+    </div>
+  </section>
+
+  <section id="decisions">
+    <h2>Decisions worth knowing</h2>
+    <p class="sub">Each one replaced a specific failure.</p>
+    <div class="grid">
+      <div class="card"><span class="pill ok">Chosen</span><h3>Plans, never direct writes</h3><p>Preview, verification, undo, and rollback all come from one path.</p></div>
+      <div class="card"><span class="pill ok">Chosen</span><h3>Whole-canvas snapshots</h3><p>Restoration is exact even after several transforms in one operation.</p></div>
+      <div class="card"><span class="pill ok">Chosen</span><h3>Canonical JSON compare</h3><p>Key order and formatting never abort a valid transaction.</p></div>
+      <div class="card"><span class="pill ok">Chosen</span><h3>Metadata cache as truth</h3><p>Aliases, embeds, and unresolved targets behave exactly like Obsidian.</p></div>
+      <div class="card"><span class="pill ok">Chosen</span><h3>Lossless adapter</h3><p>Unknown JSON Canvas fields round-trip through every write.</p></div>
+      <div class="card"><span class="pill ok">Chosen</span><h3>Normalize on load</h3><p>No version field; one idempotent validator for stored and imported data.</p></div>
+    </div>
+  </section>
+
+  <section id="traps">
+    <h2>Landmines</h2>
+    <p class="sub">The failures that look like small cleanups until they corrupt a canvas.</p>
+    <div class="grid">
+      <div class="card trap"><span class="pill bad">Trap</span><h3>Forcing stale writes</h3><p>If the file changed since preview, abort. Overwriting discards user edits.</p></div>
+      <div class="card trap"><span class="pill bad">Trap</span><h3>Re-entrant commits</h3><p>Canvas events trigger auto-sync; the active lock is what stops nesting.</p></div>
+      <div class="card trap"><span class="pill bad">Trap</span><h3>Dropping extra fields</h3><p>Rebuilding nodes from known keys deletes plugin-specific canvas data.</p></div>
+      <div class="card trap"><span class="pill bad">Trap</span><h3>setData without save</h3><p>The change looks applied and disappears when the vault reloads.</p></div>
+      <div class="card trap"><span class="pill bad">Trap</span><h3>Duplicate wikilinks</h3><p>Check both <code>[[Note]]</code> and <code>[[Note|alias]]</code> before appending.</p></div>
+      <div class="card trap"><span class="pill bad">Trap</span><h3>Broad unlink regex</h3><p>Only standalone wikilink lines may be removed; inline text stays.</p></div>
+      <div class="card trap"><span class="pill bad">Trap</span><h3>Loose media roots</h3><p>Substring matching pulls in sibling folders with the same name.</p></div>
+      <div class="card trap"><span class="pill bad">Trap</span><h3>Leaked audio context</h3><p>Close the context and clear the progress interval or memory climbs.</p></div>
+    </div>
+  </section>
+
+  <section id="verify">
+    <h2>Verification</h2>
+    <p class="sub">A change is done only when these pass.</p>
+    <table>
+      <thead><tr><th>Check</th><th>Command</th><th>Pass condition</th></tr></thead>
+      <tbody>
+        <tr><td>Types</td><td><code>npx tsc -noEmit -skipLibCheck</code></td><td>exit 0</td></tr>
+        <tr><td>Lint</td><td><code>npm run lint</code></td><td>0 errors; warnings reviewed</td></tr>
+        <tr><td>Bundle</td><td><code>npm run build</code></td><td>root <code>main.js</code> regenerated</td></tr>
+        <tr><td>Parity</td><td>compare built bundle with the live runtime</td><td>same behaviour; only minified names differ</td></tr>
+        <tr><td>Smoke</td><td>manual canvas pass</td><td>layout → undo, snap, optimize, connect, reconcile, insert media</td></tr>
+      </tbody>
+    </table>
+    <div class="flow" style="margin-top:14px">
+      <span class="step"><span class="kbd">Cmd/Ctrl</span> palette: geometry</span>
+      <span class="step"><span class="kbd">Cmd/Ctrl</span> palette: power tools</span>
+      <span class="step"><span class="kbd">Cmd/Ctrl</span> palette: insights</span>
+      <span class="step"><span class="kbd">Cmd/Ctrl</span> palette: undo / redo</span>
+    </div>
+  </section>
+
+  <footer>
+    Canvas Toolkit · TypeScript port of the live 1.0.0 bundle · Docs: PRODUCT, ARCHITECTURE, DECISIONS_AND_TRAPS.
+  </footer>
+</div>
+</body>
+</html>
