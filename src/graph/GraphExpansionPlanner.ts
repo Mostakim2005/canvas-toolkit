@@ -43,7 +43,11 @@ export class VaultExpansionPlanner {
 			for (const [source, target] of targets) {
 				if (relationships.length >= options.maxEdges) break;
 				relationships.push({ source, target });
-				if (!visited.has(target) && visited.size < options.maxNodes) { visited.add(target); queue.push({ path: target, depth: current.depth + 1 }); }
+				const neighbor = source === sourceFile.path ? target : source;
+				if (!visited.has(neighbor) && visited.size < options.maxNodes) {
+					visited.add(neighbor);
+					queue.push({ path: neighbor, depth: current.depth + 1 });
+				}
 			}
 		}
 		const missingPaths = [...visited].filter(path => !knownPaths.has(path));

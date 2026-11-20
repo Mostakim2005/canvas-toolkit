@@ -9,7 +9,6 @@ export class UniversalRelationshipModal extends Modal {
 	private query = '';
 	private mode: RelationshipLinkMode;
 	private label = '';
-	private removeMarkdown = false;
 	private targetOptions: Array<{ key: string; title: string; subtitle: string; nodeId?: string; filePath?: string }> = [];
 	private targetList!: HTMLElement;
 
@@ -61,7 +60,7 @@ export class UniversalRelationshipModal extends Modal {
 	private renderDetails(): void {
 		this.contentEl.querySelector('.ctk-relationship-details')?.remove();
 		const details = this.contentEl.createDiv({ cls: 'ctk-relationship-details' });
-		if (this.mode !== 'visual') {
+		if (this.mode !== 'semantic') {
 			new Setting(details).setName('Edge label').addText((text: TextComponent) => text.setPlaceholder('Optional').setValue(this.label).onChange((value: string) => this.label = value));
 		}
 		const actions = details.createDiv({ cls: 'ctk-modal-actions' });

@@ -79,10 +79,10 @@
    ========================================================================== */
 
 :root {
-  --ctk-glass-surface: rgba(var(--mono-rgb-100, 255, 255, 255), 0.72);
-  --ctk-glass-surface-subtle: rgba(var(--mono-rgb-100, 255, 255, 255), 0.50);
-  --ctk-glass-surface-elevated: rgba(var(--mono-rgb-100, 255, 255, 255), 0.85);
-  --ctk-glass-border: rgba(var(--mono-rgb-0, 0, 0), 0.08);
+  --ctk-glass-surface: rgba(var(--mono-rgb-0, 255, 255, 255), 0.76);
+  --ctk-glass-surface-subtle: rgba(var(--mono-rgb-0, 255, 255, 255), 0.55);
+  --ctk-glass-surface-elevated: rgba(var(--mono-rgb-0, 255, 255, 255), 0.88);
+  --ctk-glass-border: rgba(var(--mono-rgb-100, 0, 0, 0), 0.10);
   --ctk-glass-border-luminous: rgba(var(--interactive-accent-rgb, 100, 108, 255), 0.28);
   --ctk-glass-blur: blur(16px) saturate(160%);
   --ctk-glass-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06);
@@ -189,7 +189,9 @@ body.ctk-glassmorphic .ctk-insight-row {
   background: var(--ctk-glass-surface-subtle);
   backdrop-filter: var(--ctk-glass-blur);
   -webkit-backdrop-filter: var(--ctk-glass-blur);
-  border: 1px solid var(--ctk-glass-border);
+  border-top: 1px solid var(--ctk-glass-border);
+  border-right: 1px solid var(--ctk-glass-border);
+  border-bottom: 1px solid var(--ctk-glass-border);
 }
 
 body.ctk-glassmorphic .ctk-audio-waveform {

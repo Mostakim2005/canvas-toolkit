@@ -2,6 +2,17 @@ import { Modal, Notice, setIcon, type App, type TFile } from 'obsidian';
 import { AudioAnalyzer, type WaveformData } from './AudioAnalyzer';
 import type { CanvasToolkitSettings } from '../types';
 
+const sharedAnalyzers = new WeakMap<App, AudioAnalyzer>();
+
+function getAudioAnalyzer(app: App): AudioAnalyzer {
+	let analyzer = sharedAnalyzers.get(app);
+	if (!analyzer) {
+		analyzer = new AudioAnalyzer(app);
+		sharedAnalyzers.set(app, analyzer);
+	}
+	return analyzer;
+}
+
 export class AudioPlayerModal extends Modal {
 	private readonly analyzer: AudioAnalyzer;
 	private audio?: HTMLAudioElement;
@@ -10,10 +21,11 @@ export class AudioPlayerModal extends Modal {
 	private metaEl?: HTMLElement;
 	private data?: WaveformData;
 	private timer?: number;
+	private closed = false;
 
 	constructor(app: App, private readonly file: TFile, private readonly settings?: CanvasToolkitSettings) {
 		super(app);
-		this.analyzer = new AudioAnalyzer(app);
+		this.analyzer = getAudioAnalyzer(app);
 	}
 
 	async onOpen(): Promise<void> {
@@ -29,23 +41,31 @@ export class AudioPlayerModal extends Modal {
 		const meta = this.metaEl = root.createDiv({ cls: 'ctk-audio-meta' });
 		meta.setText('Preparing waveform…');
 		graph.addEventListener('click', (event: MouseEvent) => {
-			if (!this.audio || !this.data) return;
+			if (!this.audio || !this.data || !Number.isFinite(this.audio.duration) || this.audio.duration <= 0) return;
 			const rect = graph.getBoundingClientRect();
 			this.audio.currentTime = ((event.clientX - rect.left) / Math.max(1, rect.width)) * this.audio.duration;
 			this.renderProgress();
 		});
 		this.renderControls(root);
+		this.timer = window.setInterval(() => this.renderProgress(), 100);
 		try {
-			this.data = await this.analyzer.analyze(this.file);
+			const waveformData = await this.analyzer.analyze(this.file, this.settings?.audioWaveformPoints ?? 180);
+			if (this.closed) return;
+			this.data = waveformData;
 			this.renderWaveform();
 		} catch (error) {
-			meta.setText(error instanceof Error ? error.message : 'Unable to analyze audio.');
+			if (!this.closed) {
+				meta.setText(error instanceof Error ? error.message : 'Unable to analyze audio.');
+			}
 		}
-		this.timer = window.setInterval(() => this.renderProgress(), 100);
 	}
 
 	onClose(): void {
-		if (this.timer !== undefined) window.clearInterval(this.timer);
+		this.closed = true;
+		if (this.timer !== undefined) {
+			window.clearInterval(this.timer);
+			this.timer = undefined;
+		}
 		this.audio?.pause();
 		this.audio?.removeAttribute('src');
 		this.audio?.load();
@@ -53,16 +73,17 @@ export class AudioPlayerModal extends Modal {
 	}
 
 	private renderControls(root: HTMLElement): void {
+		const seekSecs = this.settings?.audioSeekSeconds ?? 10;
 		const controls = root.createDiv({ cls: 'ctk-audio-controls' });
-		const back = controls.createEl('button', { attr: { 'aria-label': 'Seek back 10 seconds' } }); setIcon(back, 'rotate-ccw');
-		back.addEventListener('click', () => this.seek(-(this.settings?.audioSeekSeconds ?? 10)));
+		const back = controls.createEl('button', { attr: { 'aria-label': `Seek back ${seekSecs} seconds` } }); setIcon(back, 'rotate-ccw');
+		back.addEventListener('click', () => this.seek(-seekSecs));
 		const play = controls.createEl('button', { attr: { 'aria-label': 'Play or pause' } }); setIcon(play, 'play');
 		play.addEventListener('click', () => { if (!this.audio) return; if (this.audio.paused) void this.audio.play(); else this.audio.pause(); play.empty(); setIcon(play, this.audio.paused ? 'play' : 'pause'); });
-		const forward = controls.createEl('button', { attr: { 'aria-label': 'Seek forward 10 seconds' } }); setIcon(forward, 'rotate-cw');
-		forward.addEventListener('click', () => this.seek(this.settings?.audioSeekSeconds ?? 10));
+		const forward = controls.createEl('button', { attr: { 'aria-label': `Seek forward ${seekSecs} seconds` } }); setIcon(forward, 'rotate-cw');
+		forward.addEventListener('click', () => this.seek(seekSecs));
 		const range = this.progressEl = controls.createEl('input', { attr: { type: 'range', min: '0', max: '1', step: '0.001' } });
 		range.value = '0';
-		range.addEventListener('input', () => { if (this.audio) this.audio.currentTime = Number(range.value) * this.audio.duration; });
+		range.addEventListener('input', () => { if (this.audio && Number.isFinite(this.audio.duration)) this.audio.currentTime = Number(range.value) * this.audio.duration; });
 		controls.createSpan({ cls: 'ctk-audio-time', text: '0:00 / 0:00' });
 	}
 

@@ -19,9 +19,10 @@ export class MediaPickerModal extends Modal {
 	private readonly selected = new Set<string>();
 	private items: MediaItem[] = [];
 	private query = '';
-	private filter: 'image' | 'pdf' | 'audio' | 'all' = 'all';
+	private filter: 'image' | 'pdf' | 'both' | 'audio' | 'all' = 'all';
 	private gridColumns: 2 | 3;
 	private searchDebounce?: number;
+	private insertBtn?: HTMLButtonElement;
 
 	private readonly hostApp: App;
 
@@ -29,7 +30,7 @@ export class MediaPickerModal extends Modal {
 		super(app);
 		this.hostApp = app;
 		this.gridColumns = options.settings.mediaGridColumns;
-		this.filter = options.settings.defaultMediaKind === 'image' || options.settings.defaultMediaKind === 'pdf' || options.settings.defaultMediaKind === 'audio' ? options.settings.defaultMediaKind : 'all';
+		this.filter = options.settings.defaultMediaKind;
 	}
 
 	onOpen(): void {
@@ -65,6 +66,7 @@ export class MediaPickerModal extends Modal {
 		const controls = toolbar.createDiv({ cls: 'ctk-toolbar-group' });
 		const filter = controls.createEl('select');
 		filter.createEl('option', { value: 'all', text: 'All media' });
+		filter.createEl('option', { value: 'both', text: 'Images + PDF' });
 		filter.createEl('option', { value: 'image', text: 'Images' });
 		filter.createEl('option', { value: 'pdf', text: 'PDF' });
 		filter.createEl('option', { value: 'audio', text: 'Audio' });
@@ -76,7 +78,7 @@ export class MediaPickerModal extends Modal {
 		grid3.toggleClass('mod-cta', this.gridColumns === 3);
 		grid2.addEventListener('click', () => { this.gridColumns = 2; this.render(); });
 		grid3.addEventListener('click', () => { this.gridColumns = 3; this.render(); });
-		const insert = controls.createEl('button', { text: `Insert${this.selected.size ? ` (${this.selected.size})` : ''}` });
+		const insert = this.insertBtn = controls.createEl('button', { text: `Insert${this.selected.size ? ` (${this.selected.size})` : ''}` });
 		insert.addEventListener('click', () => { void this.insertSelected(); });
 		this.renderGrid();
 	}
@@ -96,7 +98,7 @@ export class MediaPickerModal extends Modal {
 		previous?.remove();
 		const emptyPrevious = this.contentEl.querySelector('.ctk-empty');
 		emptyPrevious?.remove();
-		const results = this.items.filter((item) => (this.filter === 'all' || item.kind === this.filter) && (item.name.toLowerCase().includes(this.query) || item.path.toLowerCase().includes(this.query)));
+		const results = this.items.filter((item) => (this.filter === 'all' || (this.filter === 'both' ? (item.kind === 'image' || item.kind === 'pdf') : item.kind === this.filter)) && (item.name.toLowerCase().includes(this.query) || item.path.toLowerCase().includes(this.query)));
 		if (!results.length) {
 			this.contentEl.createDiv({ cls: 'ctk-empty', text: 'No media found in the configured folders.' });
 			return;
@@ -149,9 +151,14 @@ export class MediaPickerModal extends Modal {
 		card.setAttribute('role', 'button');
 		card.setAttribute('aria-pressed', String(this.selected.has(item.path)));
 		card.addEventListener('click', () => {
-			if (this.selected.has(item.path)) this.selected.delete(item.path);
-			else this.selected.add(item.path);
-			this.render();
+			const nowSelected = !this.selected.has(item.path);
+			if (nowSelected) this.selected.add(item.path);
+			else this.selected.delete(item.path);
+			card.toggleClass('is-selected', nowSelected);
+			card.setAttribute('aria-pressed', String(nowSelected));
+			if (this.insertBtn) {
+				this.insertBtn.setText(`Insert${this.selected.size ? ` (${this.selected.size})` : ''}`);
+			}
 		});
 	}
 }

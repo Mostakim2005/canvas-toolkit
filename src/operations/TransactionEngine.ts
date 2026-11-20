@@ -112,7 +112,7 @@ export class TransactionEngine {
 		if (!(abstract instanceof TFile)) throw new Error(`Canvas not found: ${path}`);
 		await this.app.vault.process(abstract, current => {
 			const currentData = CanvasAdapter.parseData(JSON.parse(current), true);
-			if (expected && JSON.stringify(currentData) !== JSON.stringify(expected)) throw new Error(`Canvas changed during transaction: ${path}`);
+			if (expected && stableCanvasJson(currentData) !== stableCanvasJson(expected)) throw new Error(`Canvas changed during transaction: ${path}`);
 			return JSON.stringify(CanvasAdapter.toRawData(data), null, 2);
 		});
 	}

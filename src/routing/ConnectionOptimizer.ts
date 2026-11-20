@@ -27,10 +27,13 @@ function segmentCrosses(a: CanvasEdgeModel, b: CanvasEdgeModel, nodes: Map<strin
 	const bf = nodes.get(b.fromNode); const bt = nodes.get(b.toNode);
 	if (!af || !at || !bf || !bt) return false;
 	if (a.fromNode === b.fromNode || a.fromNode === b.toNode || a.toNode === b.fromNode || a.toNode === b.toNode) return false;
-	return segmentsIntersect(centerOf(af), centerOf(at), centerOf(bf), centerOf(bt));
+	return segmentsIntersect(
+		rectForSide(af, a.fromSide),
+		rectForSide(at, a.toSide),
+		rectForSide(bf, b.fromSide),
+		rectForSide(bt, b.toSide),
+	);
 }
-
-function centerOf(n: CanvasNodeModel) { return { x: n.x + n.width / 2, y: n.y + n.height / 2 }; }
 function orientation(a: {x:number;y:number}, b: {x:number;y:number}, c: {x:number;y:number}): number {
 	return (b.x-a.x)*(c.y-a.y)-(b.y-a.y)*(c.x-a.x);
 }

@@ -87,10 +87,20 @@ export class RelationshipEngine {
 			const file = this.app.vault.getAbstractFileByPath(path);
 			if (!(file instanceof TFile)) continue;
 			const before = await this.app.vault.cachedRead(file);
-			let after = before;
-			const links = candidates.map(c => `[[${c.targetPath!.replace(/\.md$/i, '')}]]`);
-			after += `${after.endsWith('\n') || !after ? '' : '\n'}\n${links.join('\n')}\n`;
-			changes.push(this.planner.markdownChange({ path, before, after }));
+			const additions: string[] = [];
+			const seen = new Set<string>();
+			for (const candidate of candidates) {
+				const dest = candidate.targetPath!.replace(/\.md$/i, '');
+				const token = `[[${dest}]]`;
+				if (!seen.has(token) && !before.includes(token) && !before.includes(`[[${dest}|`)) {
+					seen.add(token);
+					additions.push(token);
+				}
+			}
+			if (additions.length) {
+				const after = `${before}${before.endsWith('\n') || !before ? '' : '\n'}\n${additions.join('\n')}\n`;
+				changes.push(this.planner.markdownChange({ path, before, after }));
+			}
 		}
 		return this.planner.create('synchronize-relationships', `Add ${reconciliation.missingMarkdownLinks.length} missing Markdown link${reconciliation.missingMarkdownLinks.length === 1 ? '' : 's'}`, changes);
 	}
