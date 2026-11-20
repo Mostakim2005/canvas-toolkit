@@ -148,7 +148,7 @@ flowchart TB
 * `canvasRules` is keyed by `canvasPath`; `setCanvasRule` replaces the existing entry rather than appending a duplicate.
 
 ## 5. Data Flow: Layout To Disk
-### [FLOW: Preview-Commit] | Aliases: apply changes, review dialog, replace-canvas
+### [SUBSYSTEM: Preview-Commit-Flow] | Aliases: apply changes, review dialog, replace-canvas
 > **1-Line Summary:** Geometry → plan → review → commit → verify, with the whole canvas as one before/after snapshot.
 ```mermaid
 sequenceDiagram
@@ -172,7 +172,7 @@ sequenceDiagram
 * A commit failure triggers `applySnapshot(plan, 'before')` best-effort before rethrowing; the review dialog re-enables its button and shows the message.
 
 ## 6. Data Flow: Relationship Reconciliation
-### [FLOW: Two-Way-Sync] | Aliases: markdown links, canvas edges, appendix
+### [SUBSYSTEM: Two-Way-Sync-Flow] | Aliases: markdown links, canvas edges, appendix
 > **1-Line Summary:** Link metadata produces candidates; the safe plan adds canvas edges unconditionally and Markdown links only when absent.
 ```mermaid
 flowchart TB
@@ -192,7 +192,7 @@ flowchart TB
 * Conflict warnings never block the plan; they appear in the review dialog.
 
 ## 7. Data Flow: Media Insertion
-### [FLOW: Media-Insert] | Aliases: picker, canvas anchor, markdown embed
+### [SUBSYSTEM: Media-Insert-Flow] | Aliases: picker, canvas anchor, markdown embed
 > **1-Line Summary:** Scan once, pick items, then either insert `![[path]]` lines or create file nodes next to the selection.
 * **Markdown:** `editor.replaceSelection` with one embed per line, then a journal entry.
 * **Canvas:** clone the data, choose a grid anchored at `x + width + 80`, add `file` nodes (480×320 images, 520×360 otherwise), then open a review plan.
@@ -200,7 +200,7 @@ flowchart TB
 * **Picker:** an image's natural size fills in the resolution caption after load; PDFs render in an iframe only when `previewPdf` is on.
 
 ## 8. Persistence And Concurrency Rules
-### [STATE: Single-Active-Transaction] | Aliases: active flag, undo stack, stale state
+### [SUBSYSTEM: Single-Active-Transaction-State] | Aliases: active flag, undo stack, stale state
 > **1-Line Summary:** Only one commit, undo, or redo may run at a time, and every stack is trimmed to the configured journal limit.
 * **Why:** Canvas writes trigger events that can re-enter auto-sync; overlapping transactions would interleave snapshots.
 * **Staleness:** canonical JSON (sorted keys) is compared before writing, so formatting-only differences do not produce false conflicts.
@@ -218,20 +218,20 @@ npm run build                   # tsc + esbuild -> main.js
 * Manual smoke test: open a canvas with 4+ cards, preview each layout, undo it, align/distribute, snap, optimize anchors, connect a node to a vault file, reconcile links, and insert one image plus one audio file.
 
 ## 10. Extension Recipes
-### [RECIPE: Add-A-Layout] | Aliases: new algorithm, layout select, preset kind
+### [SUBSYSTEM: Add-A-Layout-Recipe] | Aliases: new algorithm, layout select, preset kind
 > **1-Line Summary:** Add the algorithm, extend the kind union, then add it to the geometry select and preset validator.
 1. Implement a private method on `LayoutEngine` that only mutates the cloned selected nodes.
 2. Extend `LayoutKind` in `src/layout/LayoutEngine.ts` and the preset validator's allowed list in `src/main.ts`.
 3. Add the option in `CanvasGeometryModal` and in the preset creator's select.
 4. Verify with a two-node selection and a whole-canvas run, then undo both.
 
-### [RECIPE: Add-A-Command] | Aliases: new command, checkCallback, review plan
+### [SUBSYSTEM: Add-A-Command-Recipe] | Aliases: new command, checkCallback, review plan
 > **1-Line Summary:** Register with `checkCallback`, bail out when no canvas is active, and route mutations through a plan.
 1. Compute the condition from `currentCanvas()` and the selection before opening anything.
 2. Build the before/after model, wrap it with `OperationPlanner`, and open `OperationPreviewModal` with the active adapter.
 3. Never call `setData` directly; that bypasses verification, undo, and rollback.
 
-### [RECIPE: Change-Persisted-Settings] | Aliases: normalize, defaults, data.json
+### [SUBSYSTEM: Change-Persisted-Settings-Recipe] | Aliases: normalize, defaults, data.json
 > **1-Line Summary:** Add the field to the type and defaults, then clamp or validate it inside `normalizeSettings`.
 1. Treat `loadData()` as untrusted: coerce types and clamp ranges there, not in consumers.
 2. Keep `importConfiguration` going through the same normalizer.
