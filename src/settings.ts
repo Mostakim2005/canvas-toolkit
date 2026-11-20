@@ -100,8 +100,16 @@ export class CanvasToolkitSettingTab extends PluginSettingTab {
 				.onChange((value: string) => { this.pluginRef.settings.defaultLinkMode = value as CanvasToolkitSettings['defaultLinkMode']; void this.pluginRef.saveSettings(); }));
 
 		new Setting(containerEl)
-			.setName('Canvas insights')
-			.setDesc('Keep graph diagnostics available from the Canvas command palette.')
+			.setName('Auto-optimize connections after layout')
+			.setDesc('Automatically re-evaluate connector anchor sides whenever a layout or preset is previewed.')
+			.addToggle((toggle: ToggleComponent) => toggle.setValue(this.pluginRef.settings.autoOptimizeConnections).onChange((value: boolean) => {
+				this.pluginRef.settings.autoOptimizeConnections = value;
+				void this.pluginRef.saveSettings();
+			}));
+
+		new Setting(containerEl)
+			.setName('Canvas insights on open')
+			.setDesc('Show a brief graph health notice when switching to a Canvas.')
 			.addToggle((toggle: ToggleComponent) => toggle.setValue(this.pluginRef.settings.showGraphInsightsOnOpen).onChange((value: boolean) => { this.pluginRef.settings.showGraphInsightsOnOpen = value; void this.pluginRef.saveSettings(); }));
 
 		new Setting(containerEl)

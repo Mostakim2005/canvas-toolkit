@@ -39,6 +39,7 @@ export default class CanvasToolkitPlugin extends Plugin {
 	readonly relationshipEngine = new RelationshipEngine(this.app);
 	private readonly expansionPlanner = new VaultExpansionPlanner(this.app);
 	private syncNoticeKey = '';
+	private lastInsightCanvasPath = '';
 
 	async onload(): Promise<void> {
 		await this.loadSettings();
@@ -141,7 +142,10 @@ export default class CanvasToolkitPlugin extends Plugin {
 		}));
 
 		this.app.workspace.onLayoutReady(() => {
-			this.registerEvent(this.app.workspace.on('active-leaf-change', () => void this.handleAutoSync()));
+			this.registerEvent(this.app.workspace.on('active-leaf-change', () => {
+				this.maybeShowInsightsNotice();
+				void this.handleAutoSync();
+			}));
 			this.registerEvent(this.app.metadataCache.on('changed', () => void this.handleAutoSync()));
 			void this.handleAutoSync();
 		});
@@ -194,6 +198,18 @@ export default class CanvasToolkitPlugin extends Plugin {
 		if (!plan.changes.length) { new Notice('No missing Markdown links found.'); return; }
 		new OperationPreviewModal(this.app, plan, this.transactionEngine, adapter).open();
 	}
+	private maybeShowInsightsNotice(): void {
+		if (!this.settings.showGraphInsightsOnOpen) return;
+		const adapter = this.currentCanvas();
+		const path = adapter?.getPath();
+		if (!adapter || !path || path === this.lastInsightCanvasPath) return;
+		this.lastInsightCanvasPath = path;
+		const data = adapter.getData();
+		const analysis = this.graphAnalyzer.analyze(data);
+		const stats = graphStats(data);
+		new Notice(`Canvas: ${analysis.nodeCount} nodes, ${analysis.edgeCount} edges · ${stats.components} component${stats.components === 1 ? '' : 's'} · ${analysis.orphanEdgeIds.length} orphan edge${analysis.orphanEdgeIds.length === 1 ? '' : 's'}.`);
+	}
+
 	private async handleAutoSync(): Promise<void> {
 		const adapter = this.currentCanvas(); const path = adapter?.getPath(); if (!adapter || !path) return;
 		const rule = this.getCanvasRule(path); const mode = rule?.syncMode ?? this.settings.syncMode;

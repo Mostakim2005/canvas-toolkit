@@ -1,28 +1,11 @@
 import { Modal, Notice, type App } from 'obsidian';
 import { LayoutEngine } from './layout/LayoutEngine';
+import { ConnectionOptimizer } from './routing/ConnectionOptimizer';
 import { OperationPlanner } from './operations/OperationPlanner';
 import { OperationPreviewModal } from './operations/OperationPreviewModal';
 import type CanvasToolkitPlugin from './main';
 import type { CanvasRule, LayoutPreset } from './types';
-
-export function graphStats(data: { nodes: { id: string }[]; edges: { fromNode: string; toNode: string }[] }) {
-	const degree = new Map<string, number>();
-	for (const node of data.nodes) degree.set(node.id, 0);
-	for (const edge of data.edges) { degree.set(edge.fromNode, (degree.get(edge.fromNode) ?? 0) + 1); degree.set(edge.toNode, (degree.get(edge.toNode) ?? 0) + 1); }
-	const components = connectedComponents(data);
-	const averageDegree = data.nodes.length ? (2 * data.edges.length) / data.nodes.length : 0;
-	const possible = data.nodes.length * Math.max(0, data.nodes.length - 1);
-	return { nodes: data.nodes.length, edges: data.edges.length, averageDegree, components, density: possible ? data.edges.length / possible : 0, maxDegree: Math.max(0, ...degree.values()) };
-}
-
-function connectedComponents(data: { nodes: { id: string }[]; edges: { fromNode: string; toNode: string }[] }): number {
-	const adj = new Map<string, Set<string>>();
-	for (const n of data.nodes) adj.set(n.id, new Set());
-	for (const e of data.edges) { adj.get(e.fromNode)?.add(e.toNode); adj.get(e.toNode)?.add(e.fromNode); }
-	const visited = new Set<string>(); let count = 0;
-	for (const n of data.nodes) if (!visited.has(n.id)) { count++; const stack = [n.id]; visited.add(n.id); while (stack.length) { for (const next of adj.get(stack.pop()!) ?? []) if (!visited.has(next)) { visited.add(next); stack.push(next); } } }
-	return count;
-}
+export { graphStats } from './graph/GraphAnalyzer';
 
 export class Phase5Modal extends Modal {
 	constructor(app: App, private readonly plugin: CanvasToolkitPlugin) { super(app); }
@@ -50,7 +33,10 @@ export class Phase5Modal extends Modal {
 				const adapter = this.plugin.currentCanvas();
 				if (!adapter) { new Notice('Open a canvas first.'); return; }
 				const before = adapter.getData();
-				const after = new LayoutEngine().layout(before, preset.kind, adapter.getSelectionIds().length ? adapter.getSelectionIds() : undefined, { gapX: preset.gapX, gapY: preset.gapY });
+				let after = new LayoutEngine().layout(before, preset.kind, adapter.getSelectionIds().length ? adapter.getSelectionIds() : undefined, { gapX: preset.gapX, gapY: preset.gapY });
+				if (this.plugin.settings.autoOptimizeConnections) {
+					after = new ConnectionOptimizer().optimize(after, { preserveAxes: true, crossingPenalty: 160, preferExisting: 10 });
+				}
 				const planner = new OperationPlanner();
 				const plan = planner.create('layout-preset', `Apply layout preset: ${preset.name}`, [planner.canvasChange(adapter.getPath() ?? '', before, after)]);
 				new OperationPreviewModal(this.app, plan, this.plugin.transactionEngine, adapter).open();

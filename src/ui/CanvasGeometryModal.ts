@@ -24,7 +24,13 @@ export class CanvasGeometryModal extends Modal {
 		layout.createEl('h3', { text: 'Layout' });
 		const layoutSelect = layout.createEl('select');
 		for (const kind of ['grid','hierarchical','radial','mind-map','compact'] as LayoutKind[]) layoutSelect.createEl('option', { value: kind, text: titleCase(kind) });
-		layout.createEl('button', { text: 'Preview layout' }).addEventListener('click', () => this.preview(this.layoutEngine.layout(this.adapter.getData(), layoutSelect.value as LayoutKind, selection.length ? selection : undefined, { gapX: this.plugin.settings.layoutGap, gapY: this.plugin.settings.layoutGap }), `Apply ${titleCase(layoutSelect.value)} layout`));
+		layout.createEl('button', { text: 'Preview layout' }).addEventListener('click', () => {
+			let next = this.layoutEngine.layout(this.adapter.getData(), layoutSelect.value as LayoutKind, selection.length ? selection : undefined, { gapX: this.plugin.settings.layoutGap, gapY: this.plugin.settings.layoutGap });
+			if (this.plugin.settings.autoOptimizeConnections) {
+				next = this.optimizer.optimize(next, { preserveAxes: true, crossingPenalty: 160, preferExisting: 10 });
+			}
+			this.preview(next, `Apply ${titleCase(layoutSelect.value)} layout`);
+		});
 
 		const alignSection = root.createDiv({ cls: 'ctk-control-section' });
 		alignSection.createEl('h3', { text: 'Align / distribute' });

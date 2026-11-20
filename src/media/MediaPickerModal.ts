@@ -140,10 +140,12 @@ export class MediaPickerModal extends Modal {
 		}
 		const meta = card.createDiv({ cls: 'ctk-media-meta' });
 		meta.createDiv({ cls: 'ctk-media-name', text: item.name });
-		const sub = meta.createDiv({ cls: 'ctk-media-sub' });
-		sub.createSpan({ text: item.kind.toUpperCase() });
-		const details = sub.createSpan({ cls: 'ctk-resolution' });
-		details.setText(item.width && item.height ? `${item.width}×${item.height} · ${humanSize(item.size)}` : humanSize(item.size));
+		if (this.options.settings.showMediaMetadata !== false) {
+			const sub = meta.createDiv({ cls: 'ctk-media-sub' });
+			sub.createSpan({ text: item.kind.toUpperCase() });
+			const details = sub.createSpan({ cls: 'ctk-resolution' });
+			details.setText(item.width && item.height ? `${item.width}×${item.height} · ${humanSize(item.size)}` : humanSize(item.size));
+		}
 		card.addEventListener('keydown', (event: KeyboardEvent) => {
 			if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); card.click(); }
 		});
