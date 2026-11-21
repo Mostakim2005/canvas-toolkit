@@ -122,3 +122,9 @@
 * No automatic background rewrite of user canvases; sync defaults to **off**.
 * No custom canvas renderer or replacement for Obsidian's canvas view.
 * No cloud, AI, or network calls of any kind.
+
+### [FEATURE: UI-UX-Parity-And-Accessibility] | Aliases: ribbon icon, status bar pill, focus visible, reduced motion
+> **1-Line Summary:** Adds layout-grid ribbon icon, clickable Canvas node/edge count Status Bar pill, and WCAG accessibility standards (:focus-visible, prefers-reduced-motion).
+* **User Intention (Non-Negotiable):** Quick access to Canvas Toolkit from the Obsidian ribbon and status bar with accessible keyboard focus and respect for system motion preferences.
+* **Visual / UI Behavior:** Layout-grid ribbon button opens Canvas modal; status bar displays real-time canvas item count; high-contrast focus rings and zero animations under reduced motion.
+* **Code Anchors (Grep Targets):** `src/main.ts`, `styles.css`

@@ -40,11 +40,52 @@ export default class CanvasToolkitPlugin extends Plugin {
 	private readonly expansionPlanner = new VaultExpansionPlanner(this.app);
 	private syncNoticeKey = '';
 	private lastInsightCanvasPath = '';
+	private statusBarEl: HTMLElement | null = null;
 
 	async onload(): Promise<void> {
 		await this.loadSettings();
 		this.applyThemePreferences();
 		this.addSettingTab(new CanvasToolkitSettingTab(this.app, this));
+
+		const ribbonEl = this.addRibbonIcon('layout-grid', 'Canvas Toolkit: geometry & power tools', () => {
+			const adapter = this.currentCanvas();
+			if (adapter) {
+				new CanvasGeometryModal(this.app, this, adapter).open();
+				return;
+			}
+			const target = this.currentTarget();
+			if (target) {
+				void this.openMediaPicker(target);
+				return;
+			}
+			new Notice('Open a Canvas or Markdown note to use Canvas Toolkit.');
+		});
+		ribbonEl.setAttribute('aria-label', 'Canvas Toolkit: geometry and power tools');
+
+		this.statusBarEl = this.addStatusBarItem();
+		this.statusBarEl.addClass('ctk-status-pill');
+		this.statusBarEl.setAttribute('role', 'button');
+		this.statusBarEl.setAttribute('tabindex', '0');
+		this.statusBarEl.setAttribute('aria-label', 'Open Canvas Toolkit geometry modal');
+		const updateCanvasStatus = () => {
+			if (!this.statusBarEl) return;
+			const active = this.currentCanvas();
+			this.statusBarEl.style.display = active ? '' : 'none';
+			if (active) this.statusBarEl.setText('Canvas Toolkit');
+		};
+		this.statusBarEl.addEventListener('click', () => {
+			const adapter = this.currentCanvas();
+			if (adapter) new CanvasGeometryModal(this.app, this, adapter).open();
+		});
+		this.statusBarEl.addEventListener('keydown', (evt: KeyboardEvent) => {
+			if (evt.key === 'Enter' || evt.key === ' ') {
+				evt.preventDefault();
+				const adapter = this.currentCanvas();
+				if (adapter) new CanvasGeometryModal(this.app, this, adapter).open();
+			}
+		});
+		this.registerEvent(this.app.workspace.on('active-leaf-change', updateCanvasStatus));
+		this.app.workspace.onLayoutReady(updateCanvasStatus);
 
 		this.addCommand({
 			id: 'insert-media-with-preview', name: 'Insert media with preview',
