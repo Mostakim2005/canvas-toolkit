@@ -32,19 +32,23 @@ function isSettingsRecord(value: unknown): value is Partial<CanvasToolkitSetting
 }
 
 export default class CanvasToolkitPlugin extends Plugin {
-	settings!: CanvasToolkitSettings;
+	settings: CanvasToolkitSettings = { ...DEFAULT_SETTINGS };
 	readonly journal = new OperationJournal();
 	readonly transactionEngine = new TransactionEngine(this.app, () => this.settings?.journalLimit ?? 50);
 	private readonly graphAnalyzer = new GraphAnalyzer();
 	readonly relationshipEngine = new RelationshipEngine(this.app);
 	private readonly expansionPlanner = new VaultExpansionPlanner(this.app);
+	private settingsReady: Promise<void> = Promise.resolve();
 	private syncNoticeKey = '';
 	private lastInsightCanvasPath = '';
 	private statusBarEl: HTMLElement | null = null;
 
-	async onload(): Promise<void> {
-		await this.loadSettings();
-		this.applyThemePreferences();
+	onload(): void {
+		this.settings = { ...DEFAULT_SETTINGS };
+		this.normalizeSettings();
+		this.settingsReady = this.loadSettings().then(() => {
+			this.applyThemePreferences();
+		});
 		this.addSettingTab(new CanvasToolkitSettingTab(this.app, this));
 
 		const ribbonEl = this.addRibbonIcon('layout-grid', 'Canvas Toolkit: geometry & power tools', () => {
@@ -328,7 +332,7 @@ export default class CanvasToolkitPlugin extends Plugin {
 		this.settings.defaultLinkMode = this.settings.defaultLinkMode === 'semantic' || this.settings.defaultLinkMode === 'both' ? this.settings.defaultLinkMode : 'visual';
 		this.settings.glassmorphism = this.settings.glassmorphism !== false;
 	}
-	async saveSettings(): Promise<void> { await this.saveData(this.settings); }
+	async saveSettings(): Promise<void> { await this.settingsReady; await this.saveData(this.settings); }
 	onunload(): void { document.body.removeClass('ctk-glassmorphic'); }
 	applyThemePreferences(): void {
 		if (this.settings.glassmorphism !== false) document.body.addClass('ctk-glassmorphic');

@@ -214,3 +214,9 @@ flowchart LR
 * **Why It Bites:** Rebuilding overwrites the known-good bundle and removes the user's rollback path.
 * **Rule:** Build only to the repository root; treat `runtime/` as read-only.
 * **Code Anchors (Grep Targets):** `esbuild.config.mjs`, `runtime/main.js`
+
+### [DECISION: Non-Blocking-Startup-Hydration] | Aliases: startup latency, non-blocking onload, deferred settings
+> **1-Line Summary:** Hydrated settings and glassmorphism theme toggle asynchronously via settingsReady so onload() returns immediately without blocking Obsidian startup.
+* **Decision Maker:** `[DECIDED BY: HUMAN]`
+* **Protected Code Anchors (Grep Targets):** `src/main.ts` -> `onload`, `settingsReady`
+
